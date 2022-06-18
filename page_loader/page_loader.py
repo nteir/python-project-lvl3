@@ -20,7 +20,7 @@ def get_output_path(source_path, dest_path):
     url = urlparse(source_path)
     url_path, _ = os.path.splitext(url.path)
     url_path = '-'.join(filter(None, url_path.split('/')))
-    dest_name = re.sub('[\W^_]', '-', url.netloc)
+    dest_name = re.sub(r'[\W^_]', '-', url.netloc)
     dest_name += f'-{url_path}.html'
     dest_name = os.path.join(dest_path, dest_name)
     return dest_name
