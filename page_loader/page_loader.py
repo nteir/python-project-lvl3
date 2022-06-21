@@ -9,12 +9,14 @@ def download(source_path, dest_path):
         dest_path = os.getcwd()
     dest_name = get_output_path(source_path, dest_path)
     if os.path.isdir(dest_path):
-        with urllib.request.urlopen(source_path) as html_file:
-            with open(dest_name, 'w') as output_html:
-                for line in html_file:
-                    output_html.write(line.decode('utf-8'))
+        with urllib.request.urlopen(source_path) as response:
+            html = response.read().decode('utf-8')
+        with open(dest_name, 'w') as output_html:
+            output_html.write(html)
     else:
-        raise NotADirectoryError('Destination path must be an existing directory')
+        raise NotADirectoryError(
+            'Destination path must be an existing directory'
+        )
     return dest_name
 
 
