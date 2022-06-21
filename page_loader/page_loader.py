@@ -1,7 +1,7 @@
 import os
 import re
 from urllib.parse import urlparse
-import urllib.request
+import requests
 
 
 def download(source_path, dest_path):
@@ -9,10 +9,9 @@ def download(source_path, dest_path):
         dest_path = os.getcwd()
     dest_name = get_output_path(source_path, dest_path)
     if os.path.isdir(dest_path):
-        with urllib.request.urlopen(source_path) as response:
-            html = response.read().decode('utf-8')
+        r = requests.get(source_path)
         with open(dest_name, 'w') as output_html:
-            output_html.write(html)
+            output_html.write(r.text)
     else:
         raise NotADirectoryError(
             'Destination path must be an existing directory'
