@@ -16,7 +16,7 @@ def test_request_download():
             received_name = download(source_url, dest_dir)
             assert received_name == expected_name
             with open(expected_name) as result_file:
-                received_content = result_file.read()
+                received_content = result_file.read().strip()
             assert received_content == expected_content
 
 
