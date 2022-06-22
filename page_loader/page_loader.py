@@ -70,7 +70,6 @@ def download_resources(files, domain, dest_dir):
             source_path = f'http://{domain}/{source}'
         dest_path = os.path.join(dest_dir, name)
         r = requests.get(source_path, stream=True)
-        print(r.status_code)
         if r.status_code == 200:
             with open(dest_path, 'wb') as resource_file:
                 for chunk in r:
