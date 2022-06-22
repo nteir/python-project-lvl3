@@ -63,7 +63,6 @@ def get_new_filename(domain, path):
 
 
 def download_resources(files, domain, dest_dir):
-    print(files)
     for name, source in files.items():
         source_path = source
         url = urlparse(source)
