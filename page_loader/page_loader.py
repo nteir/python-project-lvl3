@@ -33,10 +33,11 @@ def download(source_path, dest_path):
 def get_output_path(source_path):
     url = urlparse(source_path)
     url_path, _ = os.path.splitext(url.path)
-    url_path = '-'.join(filter(None, url_path.split('/')))
-    dest_name = re.sub(r'[\W^_]', '-', url.netloc)
-    resource_dir = dest_name + f'-{url_path}_files'
-    dest_name += f'-{url_path}.html'
+    common_string = re.sub(r'[\W^_]', '-', url.netloc)
+    path_string = '-'.join(filter(None, url_path.split('/')))
+    common_string = '-'.join(filter(None, (common_string, path_string)))
+    resource_dir = f'{common_string}_files'
+    dest_name = f'{common_string}.html'
     return dest_name, resource_dir
 
 
