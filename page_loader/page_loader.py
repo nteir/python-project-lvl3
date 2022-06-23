@@ -1,6 +1,6 @@
 import os
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 import requests
 from bs4 import BeautifulSoup
 
@@ -67,7 +67,7 @@ def download_resources(files, domain, dest_dir):
         source_path = source
         url = urlparse(source)
         if url.netloc == '':
-            source_path = f'http://{domain}/{source}'
+            source_path = urlunparse(('http', domain, source, '', '', ''))
         dest_path = os.path.join(dest_dir, name)
         r = requests.get(source_path, stream=True)
         if r.status_code == 200:
