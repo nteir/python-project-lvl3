@@ -48,15 +48,17 @@ def process_html(text, domain, resource_dir):
         src = image['src']
         src_parse = urlparse(src)
         if src_parse.netloc == '' or src_parse.netloc == domain:
-            filename = get_new_filename(domain, src_parse.path)
+            src_path = urlunparse(('http', domain, src_parse.path, '', '', ''))
+            filename = get_new_filename(src_path)
             to_download[filename] = image['src']
             image['src'] = f'{resource_dir}/{filename}'
     return soup.prettify(), to_download
 
 
-def get_new_filename(domain, path):
-    url_path, url_ext = os.path.splitext(path)
-    src_string = f'{domain}-{url_path}'
+def get_new_filename(path):
+    split_path = urlparse(path)
+    url_path, url_ext = os.path.splitext(split_path.path)
+    src_string = f'{split_path.netloc}{url_path}'
     src_string = re.sub(r'[\W^_]', '-', src_string)
     src_string = f'{src_string}{url_ext}'
     return src_string
