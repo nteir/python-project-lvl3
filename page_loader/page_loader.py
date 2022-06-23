@@ -4,6 +4,12 @@ from urllib.parse import urlparse, urlunparse
 import requests
 from bs4 import BeautifulSoup
 
+TAGS = {
+    'img': 'src',
+    'link': 'href',
+    'script': 'src',
+}
+
 
 def download(source_path, dest_path):
     if dest_path is None:
@@ -41,18 +47,24 @@ def get_output_path(source_path):
     return dest_name, resource_dir
 
 
+def is_a_resource(tag):
+    return tag.name in TAGS and tag.has_attr(TAGS[tag.name])
+
+
 def process_html(text, domain, resource_dir):
     soup = BeautifulSoup(text, 'html.parser')
-    images = soup.find_all("img")
     to_download = {}
-    for image in images:
-        src = image['src']
-        src_parse = urlparse(src)
-        if src_parse.netloc == '' or src_parse.netloc == domain:
-            src_path = urlunparse(('http', domain, src_parse.path, '', '', ''))
-            filename = get_new_filename(src_path)
-            to_download[filename] = image['src']
-            image['src'] = f'{resource_dir}/{filename}'
+    resources = soup.find_all(is_a_resource)
+    for tag in resources:
+        attribute_link = tag[TAGS[tag.name]]
+        link_parse = urlparse(attribute_link)
+        if link_parse.netloc == '' or link_parse.netloc == domain:
+            resource_path = urlunparse(
+                ('http', domain, link_parse.path, '', '', '')
+            )
+            filename = get_new_filename(resource_path)
+            to_download[filename] = attribute_link
+            tag[TAGS[tag.name]] = f'{resource_dir}/{filename}'
     return soup.prettify(), to_download
 
 

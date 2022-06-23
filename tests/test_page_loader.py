@@ -19,10 +19,15 @@ resources = [
         'url': 'http://testnetloc.com/pics/pic2.png',
         'expected_name': 'testnetloc-com-pics-pic2.png'
     },
+    {
+        'url': 'http://testnetloc.com/style/style.css',
+        'expected_name': 'testnetloc-com-style-style.css'
+    },
 ]
 to_download = {
     'testnetloc-com-pics-pic1.jpg': 'http://testnetloc.com/pics/pic1.jpg',
     'testnetloc-com-pics-pic2.png': '/pics/pic2.png',
+    'testnetloc-com-style-style.css': '/style/style.css',
 }
 
 
