@@ -1,8 +1,10 @@
 import os
+import sys
 import re
 from urllib.parse import urlparse, urlunparse
 import requests
 from bs4 import BeautifulSoup
+import logging
 
 TAGS = {
     'img': 'src',
@@ -19,21 +21,41 @@ def download(source_path, dest_path):
     dest_name, resource_dir = get_output_path(source_path)
     dest_file = os.path.join(dest_path, dest_name)
     if not os.path.isdir(dest_path):
+        logging.error(
+            f'Destination path set to {dest_path}, not an existing directory'
+        )
         raise NotADirectoryError(
             'Destination path must be an existing directory'
         )
-    r = requests.get(source_path)
-    if r.status_code != 200:
-        raise ConnectionError(f'Status code: {r.status_code}')
-    pretty_html, to_download = process_html(r.text, domain, resource_dir)
+    html = get_html_content(source_path)
+    pretty_html, to_download = process_html(html, domain, resource_dir)
     if to_download:
         dest_dir = os.path.join(dest_path, resource_dir)
         if not os.path.isdir(dest_dir):
-            os.mkdir(dest_dir)
+            try:
+                os.mkdir(dest_dir)
+            except OSError:
+                logging.error('Error creating directory.')
+                sys.exit(1)
         download_resources(to_download, domain, dest_dir)
     with open(dest_file, 'w') as output_html:
         output_html.write(pretty_html)
     return dest_file
+
+
+def get_html_content(url):
+    try:
+        r = requests.get(url)
+        if r.status_code == 200:
+            return r.text
+        else:
+            logging.error(f'Error on HTTP request, status code: {r.status_code}')
+            raise ConnectionError
+    except (OSError, ConnectionError) as e:
+        log_str = e.message if hasattr(e, 'message') else e
+        logging.debug(log_str)
+        logging.error('Error accessing the WEB page, check if URL is correct.')
+        sys.exit(1)
 
 
 def get_output_path(source_path):
@@ -84,8 +106,16 @@ def download_resources(files, domain, dest_dir):
         if url.netloc == '':
             source_path = urlunparse(('http', domain, source, '', '', ''))
         dest_path = os.path.join(dest_dir, name)
-        r = requests.get(source_path, stream=True)
-        if r.status_code == 200:
-            with open(dest_path, 'wb') as resource_file:
-                for chunk in r:
-                    resource_file.write(chunk)
+        try:
+            r = requests.get(source_path, stream=True)
+            if r.status_code == 200:
+                with open(dest_path, 'wb') as resource_file:
+                    for chunk in r:
+                        resource_file.write(chunk)
+            else:
+                logging.debug(f'Failed to access {source_path}, status code {r.status_code}')
+                logging.warning('Failed to access a resource file.')
+        except (OSError, ConnectionError) as e:
+            log_str = e.message if hasattr(e, 'message') else e
+            logging.debug(log_str)
+            logging.warning('Failed to access a resource file.')

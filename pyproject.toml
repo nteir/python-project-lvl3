@@ -21,6 +21,11 @@ requests-mock = "^1.9.3"
 [tool.poetry.scripts]
 page-loader = "page_loader.scripts.page_loader:main"
 
+[tool.pytest.ini_options]
+pythonpath = [
+  ".",
+]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
