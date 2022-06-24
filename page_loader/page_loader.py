@@ -49,7 +49,9 @@ def get_html_content(url):
         if r.status_code == 200:
             return r.text
         else:
-            logging.error(f'Error on HTTP request, status code: {r.status_code}')
+            logging.error(
+                f'Error on HTTP request, status code: {r.status_code}'
+            )
             raise ConnectionError
     except (OSError, ConnectionError) as e:
         log_str = e.message if hasattr(e, 'message') else e
@@ -113,7 +115,9 @@ def download_resources(files, domain, dest_dir):
                     for chunk in r:
                         resource_file.write(chunk)
             else:
-                logging.debug(f'Failed to access {source_path}, status code {r.status_code}')
+                logging.debug(
+                    f'Error accessing {source_path}, code {r.status_code}'
+                )
                 logging.warning('Failed to access a resource file.')
         except (OSError, ConnectionError) as e:
             log_str = e.message if hasattr(e, 'message') else e
