@@ -1,4 +1,4 @@
-from page_loader.page_loader import download, download_resources, process_html
+from page_loader.page_loader import BaseOSError, download, download_resources, process_html, get_html_content
 import os.path
 import tempfile
 import requests_mock as req_mock
@@ -46,8 +46,14 @@ def test_request_download(requests_mock):
 
 def test_exc_nodir_download():
     dest_dir = 'notadir'
-    with pytest.raises(NotADirectoryError):
+    with pytest.raises(BaseOSError):
         download(source_url, dest_dir)
+
+
+def test_err_get_html_content(requests_mock):
+    requests_mock.get(source_url, text='', status_code=404)
+    with pytest.raises(BaseOSError):
+        get_html_content(source_url)
 
 
 def mock_matcher(request):

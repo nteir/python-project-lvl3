@@ -1,5 +1,4 @@
 import os
-import sys
 import re
 from urllib.parse import urlparse, urlunparse
 import requests
@@ -13,6 +12,10 @@ TAGS = {
 }
 
 
+class BaseOSError(OSError):
+    pass
+
+
 def download(source_path, dest_path):
     if dest_path is None:
         dest_path = os.getcwd()
@@ -24,40 +27,43 @@ def download(source_path, dest_path):
         logging.error(
             f'Destination path set to {dest_path}, not an existing directory'
         )
-        raise NotADirectoryError(
+        raise BaseOSError(
             'Destination path must be an existing directory'
         )
     html = get_html_content(source_path)
     pretty_html, to_download = process_html(html, domain, resource_dir)
+    try:
+        with open(dest_file, 'w') as output_html:
+            output_html.write(pretty_html)
+    except OSError as e:
+        logging.error('Error creating file.')
+        raise BaseOSError() from e
     if to_download:
         dest_dir = os.path.join(dest_path, resource_dir)
         if not os.path.isdir(dest_dir):
             try:
                 os.mkdir(dest_dir)
-            except OSError:
+            except OSError as e:
                 logging.error('Error creating directory.')
-                sys.exit(1)
+                raise BaseOSError() from e
         download_resources(to_download, domain, dest_dir)
-    with open(dest_file, 'w') as output_html:
-        output_html.write(pretty_html)
     return dest_file
 
 
 def get_html_content(url):
     try:
         r = requests.get(url)
-        if r.status_code == 200:
-            return r.text
-        else:
+        try:
+            r.raise_for_status()
+        except requests.HTTPError as e:
             logging.error(
-                f'Error on HTTP request, status code: {r.status_code}'
+                f'HTTP Error, status code: {r.status_code}'
             )
-            raise ConnectionError
-    except (OSError, ConnectionError) as e:
-        log_str = e.message if hasattr(e, 'message') else e
-        logging.debug(log_str)
-        logging.error('Error accessing the WEB page, check if URL is correct.')
-        sys.exit(1)
+            raise BaseOSError() from e
+    except OSError as e:
+        logging.error('Error accessing WEB page.')
+        raise BaseOSError() from e
+    return r.text
 
 
 def get_output_path(source_path):
@@ -119,7 +125,7 @@ def download_resources(files, domain, dest_dir):
                     f'Error accessing {source_path}, code {r.status_code}'
                 )
                 logging.warning('Failed to access a resource file.')
-        except (OSError, ConnectionError) as e:
+        except OSError as e:
             log_str = e.message if hasattr(e, 'message') else e
             logging.debug(log_str)
             logging.warning('Failed to access a resource file.')
