@@ -11,4 +11,4 @@ Downloading images:
 Downloading CSS and scripts:
 [![asciicast](https://asciinema.org/a/5unfJQlQPgigbu1OSunroi5zw.svg)](https://asciinema.org/a/5unfJQlQPgigbu1OSunroi5zw)
 Readable error messages:
-[![asciicast](https://asciinema.org/a/jQvFimypR4VvLiFZYuiGAKtk4.svg)](https://asciinema.org/a/jQvFimypR4VvLiFZYuiGAKtk4)
+[![asciicast](https://asciinema.org/a/BQR2mMEQrKyxuDD3xC386uvy9.svg)](https://asciinema.org/a/BQR2mMEQrKyxuDD3xC386uvy9)

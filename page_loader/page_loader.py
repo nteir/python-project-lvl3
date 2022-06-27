@@ -16,7 +16,7 @@ class BaseOSError(OSError):
     pass
 
 
-def download(source_path, dest_path):
+def download(source_path, dest_path=None):
     if dest_path is None:
         dest_path = os.getcwd()
     url = urlparse(source_path)
@@ -53,15 +53,13 @@ def download(source_path, dest_path):
 def get_html_content(url):
     try:
         r = requests.get(url)
-        try:
-            r.raise_for_status()
-        except requests.HTTPError as e:
+        if r.status_code != 200:
             logging.error(
                 f'HTTP Error, status code: {r.status_code}'
             )
-            raise BaseOSError() from e
+            raise BaseOSError()
     except OSError as e:
-        logging.error('Error accessing WEB page.')
+        logging.error('Connection error.')
         raise BaseOSError() from e
     return r.text
 
