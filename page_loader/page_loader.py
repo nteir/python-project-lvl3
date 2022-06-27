@@ -4,6 +4,7 @@ from urllib.parse import urlparse, urlunparse
 import requests
 from bs4 import BeautifulSoup
 import logging
+from progress.bar import Bar
 
 TAGS = {
     'img': 'src',
@@ -106,6 +107,7 @@ def get_new_filename(path):
 
 
 def download_resources(files, domain, dest_dir):
+    bar = Bar('Downloading', max=len(files))
     for name, source in files.items():
         source_path = source
         url = urlparse(source)
@@ -127,3 +129,5 @@ def download_resources(files, domain, dest_dir):
             log_str = e.message if hasattr(e, 'message') else e
             logging.debug(log_str)
             logging.warning('Failed to access a resource file.')
+        bar.next()
+    bar.finish()
