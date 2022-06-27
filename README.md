@@ -8,7 +8,7 @@ Requires Python 3.8 or higher.
 
 Installation via [Poetry](https://python-poetry.org/):
 * clone the repository
-* change directory to python-project-lvl2
+* change directory to python-project-lvl3
 * run the following commands in shell:
 ```
 make install
@@ -17,7 +17,7 @@ make package-install
 ```
 
 Usage:
-gendiff page-loader [-h] [--output outputfolder] source
+page-loader [-h] [--output outputfolder] source
 
 Dependencies:
 * Requests
@@ -32,5 +32,5 @@ Downloading CSS and scripts:
 [![asciicast](https://asciinema.org/a/5unfJQlQPgigbu1OSunroi5zw.svg)](https://asciinema.org/a/5unfJQlQPgigbu1OSunroi5zw)
 Readable error messages:
 [![asciicast](https://asciinema.org/a/BQR2mMEQrKyxuDD3xC386uvy9.svg)](https://asciinema.org/a/BQR2mMEQrKyxuDD3xC386uvy9)
-Resource downlad progress bar:
+Resource download progress bar:
 [![asciicast](https://asciinema.org/a/7BlEdjd91uY6ywOZRksu3G5vs.svg)](https://asciinema.org/a/7BlEdjd91uY6ywOZRksu3G5vs)
