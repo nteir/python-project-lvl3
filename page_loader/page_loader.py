@@ -22,6 +22,7 @@ def download(source_path, dest_path=None):
         dest_path = os.getcwd()
     url = urlparse(source_path)
     domain = url.netloc
+    scheme = url.scheme
     dest_name, resource_dir = get_output_path(source_path)
     dest_file = os.path.join(dest_path, dest_name)
     if not os.path.isdir(dest_path):
@@ -32,7 +33,7 @@ def download(source_path, dest_path=None):
             'Destination path must be an existing directory'
         )
     html = get_html_content(source_path)
-    pretty_html, to_download = process_html(html, domain, resource_dir)
+    pretty_html, to_download = process_html(html, domain, scheme, resource_dir)
     try:
         with open(dest_file, 'w') as output_html:
             output_html.write(pretty_html)
@@ -42,7 +43,7 @@ def download(source_path, dest_path=None):
     if to_download:
         dest_dir = os.path.join(dest_path, resource_dir)
         create_res_dir(dest_dir)
-        download_resources(to_download, domain, dest_dir)
+        download_resources(to_download, domain, scheme, dest_dir)
     return dest_file
 
 
@@ -84,7 +85,7 @@ def is_a_resource(tag):
     return tag.name in TAGS and tag.has_attr(TAGS[tag.name])
 
 
-def process_html(text, domain, resource_dir):
+def process_html(text, domain, scheme, resource_dir):
     soup = BeautifulSoup(text, 'html.parser')
     to_download = {}
     resources = soup.find_all(is_a_resource)
@@ -93,7 +94,7 @@ def process_html(text, domain, resource_dir):
         link_parse = urlparse(attribute_link)
         if link_parse.netloc == '' or link_parse.netloc == domain:
             resource_path = urlunparse(
-                ('http', domain, link_parse.path, '', '', '')
+                (scheme, domain, link_parse.path, '', '', '')
             )
             filename = get_new_filename(resource_path)
             to_download[filename] = attribute_link
@@ -110,13 +111,13 @@ def get_new_filename(path):
     return src_string
 
 
-def download_resources(files, domain, dest_dir):
+def download_resources(files, domain, scheme, dest_dir):
     bar = Bar('Downloading', max=len(files))
     for name, source in files.items():
         source_path = source
         url = urlparse(source)
         if url.netloc == '':
-            source_path = urlunparse(('http', domain, source, '', '', ''))
+            source_path = urlunparse((scheme, domain, source, '', '', ''))
         dest_path = os.path.join(dest_dir, name)
         try:
             r = requests.get(source_path, stream=True)

@@ -8,7 +8,7 @@ import pytest
 
 source_url = 'http://testnetloc.com/some/path/fake_test.html'
 file_name = 'testnetloc-com-some-path-fake_test.html'
-# resource_dir = 'testnetloc-com-some-path-fake_test_files'
+scheme = 'http'
 domain = 'testnetloc.com'
 with open('./tests/fixtures/fake_test.html') as file:
     content = file.read()
@@ -69,7 +69,7 @@ def test_download_resources(requests_mock):
         text="Some fake response",
     )
     with tempfile.TemporaryDirectory() as tmpdirname:
-        download_resources(to_download, domain, tmpdirname)
+        download_resources(to_download, domain, scheme, tmpdirname)
         for resource in to_download.keys():
             path = os.path.join(tmpdirname, resource)
             assert os.path.isfile(path)
