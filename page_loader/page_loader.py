@@ -41,14 +41,18 @@ def download(source_path, dest_path=None):
         raise BaseOSError() from e
     if to_download:
         dest_dir = os.path.join(dest_path, resource_dir)
-        if not os.path.isdir(dest_dir):
-            try:
-                os.mkdir(dest_dir)
-            except OSError as e:
-                logging.error('Error creating directory.')
-                raise BaseOSError() from e
+        create_res_dir(dest_dir)
         download_resources(to_download, domain, dest_dir)
     return dest_file
+
+
+def create_res_dir(dest_dir):
+    if not os.path.isdir(dest_dir):
+        try:
+            os.mkdir(dest_dir)
+        except OSError as e:
+            logging.error('Error creating directory.')
+            raise BaseOSError() from e
 
 
 def get_html_content(url):
@@ -116,18 +120,22 @@ def download_resources(files, domain, dest_dir):
         dest_path = os.path.join(dest_dir, name)
         try:
             r = requests.get(source_path, stream=True)
-            if r.status_code == 200:
-                with open(dest_path, 'wb') as resource_file:
-                    for chunk in r:
-                        resource_file.write(chunk)
-            else:
-                logging.debug(
-                    f'Error accessing {source_path}, code {r.status_code}'
-                )
-                logging.warning('Failed to access a resource file.')
+            write_res_file(r, dest_path, source_path)
         except OSError as e:
             log_str = e.message if hasattr(e, 'message') else e
             logging.debug(log_str)
             logging.warning('Failed to access a resource file.')
         bar.next()
     bar.finish()
+
+
+def write_res_file(req, dest_path, source_path):
+    if req.status_code == 200:
+        with open(dest_path, 'wb') as resource_file:
+            for chunk in req:
+                resource_file.write(chunk)
+    else:
+        logging.debug(
+            f'Error accessing {source_path}, code {req.status_code}'
+        )
+        logging.warning('Failed to access a resource file.')
