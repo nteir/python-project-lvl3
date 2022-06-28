@@ -33,7 +33,9 @@ def download(source_path, dest_path=None):
             'Destination path must be an existing directory'
         )
     html = get_html_content(source_path)
-    pretty_html, to_download = process_html(html, domain, scheme, resource_dir, dest_name)
+    pretty_html, to_download = process_html(
+        html, domain, scheme, resource_dir, dest_name
+    )
     try:
         with open(dest_file, 'w') as output_html:
             output_html.write(pretty_html)
