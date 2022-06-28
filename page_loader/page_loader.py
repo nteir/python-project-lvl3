@@ -103,7 +103,8 @@ def process_html(text, domain, scheme, resource_dir, dest_name):
             tag[TAGS[tag.name]] = f'{resource_dir}/{filename}'
     canonical = soup.find("link", rel="canonical")
     if canonical:
-        canonical['href'] = f'{resource_dir}/{dest_name}'
+        # canonical['href'] = f'{resource_dir}/{dest_name}'
+        canonical['href'] = f'{dest_name}'
     return soup.prettify(), to_download
 
 
