@@ -18,7 +18,6 @@ resources = [
     'http://testnetloc.com/pics/pic1.jpg',
     'http://testnetloc.com/pics/pic2.png',
     'http://testnetloc.com/style/style.css',
-    'http://testnetloc.com/some/path/',
 ]
 to_download = {
     'testnetloc-com-pics-pic1.jpg': 'http://testnetloc.com/pics/pic1.jpg',

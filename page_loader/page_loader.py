@@ -92,7 +92,7 @@ def process_html(text, domain, scheme, resource_dir, dest_name):
     to_download = {}
     resources = soup.find_all(is_a_resource)
     for tag in resources:
-        attribute_link = tag[TAGS[tag.name]]
+        attribute_link = tag[TAGS[tag.name]]    # src or href value
         link_parse = urlparse(attribute_link)
         if link_parse.netloc == '' or link_parse.netloc == domain:
             resource_path = urlunparse(
@@ -101,16 +101,14 @@ def process_html(text, domain, scheme, resource_dir, dest_name):
             filename = get_new_filename(resource_path)
             to_download[filename] = attribute_link
             tag[TAGS[tag.name]] = f'{resource_dir}/{filename}'
-    canonical = soup.find("link", rel="canonical")
-    if canonical:
-        # canonical['href'] = f'{resource_dir}/{dest_name}'
-        canonical['href'] = f'{dest_name}'
     return soup.prettify(), to_download
 
 
 def get_new_filename(path):
     split_path = urlparse(path)
     url_path, url_ext = os.path.splitext(split_path.path)
+    if not url_ext:
+        url_ext = '.html'
     src_string = f'{split_path.netloc}{url_path}'
     src_string = re.sub(r'[\W^_]', '-', src_string)
     src_string = f'{src_string}{url_ext}'
