@@ -33,7 +33,7 @@ def download(source_path, dest_path=None):
             'Destination path must be an existing directory'
         )
     html = get_html_content(source_path)
-    pretty_html, to_download = process_html(html, domain, scheme, resource_dir)
+    pretty_html, to_download = process_html(html, domain, scheme, resource_dir, dest_name)
     try:
         with open(dest_file, 'w') as output_html:
             output_html.write(pretty_html)
@@ -85,7 +85,7 @@ def is_a_resource(tag):
     return tag.name in TAGS and tag.has_attr(TAGS[tag.name])
 
 
-def process_html(text, domain, scheme, resource_dir):
+def process_html(text, domain, scheme, resource_dir, dest_name):
     soup = BeautifulSoup(text, 'html.parser')
     to_download = {}
     resources = soup.find_all(is_a_resource)
@@ -99,6 +99,9 @@ def process_html(text, domain, scheme, resource_dir):
             filename = get_new_filename(resource_path)
             to_download[filename] = attribute_link
             tag[TAGS[tag.name]] = f'{resource_dir}/{filename}'
+    canonical = soup.find("link", rel="canonical")
+    if canonical:
+        canonical['href'] = f'{resource_dir}/{dest_name}'
     return soup.prettify(), to_download
 
 

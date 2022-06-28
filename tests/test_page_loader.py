@@ -18,6 +18,7 @@ resources = [
     'http://testnetloc.com/pics/pic1.jpg',
     'http://testnetloc.com/pics/pic2.png',
     'http://testnetloc.com/style/style.css',
+    'http://testnetloc.com/some/path/',
 ]
 to_download = {
     'testnetloc-com-pics-pic1.jpg': 'http://testnetloc.com/pics/pic1.jpg',
@@ -50,7 +51,7 @@ def test_download(requests_mock):
         assert received_file_name == file_name
         with open(received_name) as f:
             received_content = f.read()
-            assert received_content == BeautifulSoup(expected_content, features="html.parser").prettify()
+            assert BeautifulSoup(received_content, features="html.parser").prettify() == BeautifulSoup(expected_content, features="html.parser").prettify()
 
 
 def test_default_download(requests_mock):
