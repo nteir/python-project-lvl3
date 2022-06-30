@@ -1,3 +1,6 @@
+Page Loader
+-----------
+
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/nteir/python-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/nteir/python-project-lvl3/actions)
 [![Python package](https://github.com/nteir/python-project-lvl3/actions/workflows/python-package.yml/badge.svg)](https://github.com/nteir/python-project-lvl3/actions/workflows/python-package.yml)
