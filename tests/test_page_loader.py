@@ -1,7 +1,8 @@
-from page_loader.page_loader import BaseOSError, download, download_resources, get_html_content
+from page_loader.page_loader import BaseOSError, parse_args, download, download_resources, get_html_content
 from bs4 import BeautifulSoup
 import os.path
 import os
+import sys
 import tempfile
 import requests_mock as req_mock
 import pytest
@@ -25,13 +26,28 @@ to_download = {
     'testnetloc-com-style-style.css': '/style/style.css',
 }
 STATUS_CODES = [204, 403, 404, 500, 503]
+ARGV = [
+    ['page-loader', '--output', '/home/user0/output', source_url],
+    ['page-loader', source_url],
+]
+ARGS = [
+    (source_url, '/home/user0/output'),
+    (source_url, None),
+]
+
+
+@pytest.mark.parametrize("argv,args", zip(ARGV, ARGS))
+def test_parse_args(argv, args):
+    sys.argv = argv
+    received_args = parse_args()
+    expected_source, expected_output = args
+    assert received_args.source == expected_source
+    assert received_args.output == expected_output
 
 
 def mock_matcher(request):
     url = request.url
-    mocked_urls = []
-    for resource in resources:
-        mocked_urls.append(resource)
+    mocked_urls = list(resources)
     return url in mocked_urls
 
 
@@ -81,11 +97,7 @@ def test_exc_nodir_download():
         download(source_url, dest_dir)
 
 
-@pytest.fixture(name="status_codes", params=STATUS_CODES)
-def _test_params(request):
-    return request.param
-
-
+@pytest.mark.parametrize("status_codes", STATUS_CODES)
 def test_err_get_html_content(requests_mock, status_codes):
     requests_mock.get(source_url, text='', status_code=status_codes)
     with pytest.raises(BaseOSError):
