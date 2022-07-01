@@ -18,7 +18,7 @@ class BaseOSError(OSError):
     pass
 
 
-def parse_args():
+def parse_arguments():
     parser = argparse.ArgumentParser(
         description='Downloads a Web page and saves it locally.'
     )
@@ -135,16 +135,16 @@ def get_new_filename(url):
 def download_resources(files, domain, scheme, dest_path):
     bar = Bar('Downloading', max=len(files))
     for file_name, source_file_path in files.items():
-        source_path = source_file_path
-        url = urlparse(source_file_path)
-        if url.netloc == '':
-            source_path = urlunparse(
+        full_source_file_path = source_file_path
+        split_url = urlparse(source_file_path)
+        if split_url.netloc == '':
+            full_source_file_path = urlunparse(
                 (scheme, domain, source_file_path, '', '', '')
             )
         dest_file_path = os.path.join(dest_path, file_name)
         try:
-            r = requests.get(source_path, stream=True)
-            write_res_file(r, dest_file_path, source_path)
+            r = requests.get(full_source_file_path, stream=True)
+            write_res_file(r, dest_file_path, full_source_file_path)
         except OSError as e:
             log_str = e.message if hasattr(e, 'message') else e
             logging.debug(log_str)

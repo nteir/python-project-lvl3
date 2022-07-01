@@ -1,4 +1,4 @@
-from page_loader.page_loader import BaseOSError, parse_args, download, download_resources, get_html_content
+from page_loader.page_loader import BaseOSError, parse_arguments, download, download_resources, get_html_content
 from bs4 import BeautifulSoup
 import os.path
 import os
@@ -39,7 +39,7 @@ ARGS = [
 @pytest.mark.parametrize("argv,args", zip(ARGV, ARGS))
 def test_parse_args(argv, args):
     sys.argv = argv
-    received_args = parse_args()
+    received_args = parse_arguments()
     expected_source, expected_output = args
     assert received_args.source == expected_source
     assert received_args.output == expected_output

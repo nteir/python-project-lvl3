@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from page_loader.page_loader import download, parse_args, BaseOSError
+from page_loader.page_loader import download, parse_arguments, BaseOSError
 import sys
 import logging
 
 
 def main():
-    args = parse_args()
+    args = parse_arguments()
     try:
         print(download(args.source, dest_path=args.output))
     except BaseOSError as e:
