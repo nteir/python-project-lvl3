@@ -1,4 +1,4 @@
-from page_loader.page_loader import BaseOSError, parse_arguments, download, download_resources, get_html_content
+from page_loader.page_loader import FileSystemError, PageDownloadError, parse_arguments, download, download_resources, get_html_content
 from bs4 import BeautifulSoup
 import os.path
 import os
@@ -93,12 +93,12 @@ def test_download_resources(requests_mock):
 
 def test_exc_nodir_download():
     dest_dir = 'notadir'
-    with pytest.raises(BaseOSError):
+    with pytest.raises(FileSystemError):
         download(source_url, dest_dir)
 
 
 @pytest.mark.parametrize("status_codes", STATUS_CODES)
 def test_err_get_html_content(requests_mock, status_codes):
     requests_mock.get(source_url, text='', status_code=status_codes)
-    with pytest.raises(BaseOSError):
+    with pytest.raises(PageDownloadError):
         get_html_content(source_url)

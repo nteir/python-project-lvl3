@@ -14,7 +14,23 @@ TAGS = {
 }
 
 
-class BaseOSError(OSError):
+class BaseError(Exception):
+    pass
+
+
+class FileSystemError(BaseError):
+    pass
+
+
+class DownloadError(BaseError):
+    pass
+
+
+class PageDownloadError(DownloadError):
+    pass
+
+
+class ResourceDownloadError(DownloadError):
     pass
 
 
@@ -44,7 +60,7 @@ def download(source_url, dest_path=None):
         logging.error(
             f'Destination path set to {dest_path}, not an existing directory'
         )
-        raise BaseOSError(
+        raise FileSystemError(
             'Destination path must be an existing directory'
         )
 
@@ -57,7 +73,7 @@ def download(source_url, dest_path=None):
             output_html.write(pretty_html)
     except OSError as e:
         logging.error('Error creating file.')
-        raise BaseOSError() from e
+        raise FileSystemError() from e
 
     if to_download:
         resource_path = os.path.join(dest_path, resource_dir_name)
@@ -72,7 +88,7 @@ def create_resource_dir(dest_path):
             os.mkdir(dest_path)
         except OSError as e:
             logging.error('Error creating directory.')
-            raise BaseOSError() from e
+            raise FileSystemError() from e
 
 
 def get_html_content(url):
@@ -82,10 +98,10 @@ def get_html_content(url):
             logging.error(
                 f'HTTP Error, status code: {r.status_code}'
             )
-            raise BaseOSError()
+            raise PageDownloadError()
     except OSError as e:
         logging.error('Connection error.')
-        raise BaseOSError() from e
+        raise PageDownloadError() from e
     return r.text
 
 
@@ -149,6 +165,7 @@ def download_resources(files, domain, scheme, dest_path):
             log_str = e.message if hasattr(e, 'message') else e
             logging.debug(log_str)
             logging.warning('Failed to access a resource file.')
+            raise ResourceDownloadError() from e
         bar.next()
     bar.finish()
 
@@ -159,7 +176,7 @@ def write_res_file(req, dest_file_path, source_file_path):
             for chunk in req:
                 resource_file.write(chunk)
     else:
-        logging.debug(
-            f'Error accessing {source_file_path}, code {req.status_code}'
-        )
+        log_str = f'Error accessing {source_file_path}, code {req.status_code}'
+        logging.debug(log_str)
         logging.warning('Failed to access a resource file.')
+        raise ResourceDownloadError(log_str)
