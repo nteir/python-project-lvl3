@@ -90,7 +90,7 @@ def download(source_url, dest_path=None):
                 resource_path,
                 bar) for file_name, source_file_path in to_download.items()]
             result = [task.result() for task in tasks]
-            logging.info(f'All assets downloaded:')
+            logging.info('All assets downloaded:')
             for file_name in result:
                 logging.info(file_name)
         bar.finish()
