@@ -89,8 +89,8 @@ def test_download_resources(requests_mock):
     with tempfile.TemporaryDirectory() as tmpdirname:
         bar = Bar('Downloading', max=len(to_download))
         with futures.ThreadPoolExecutor(max_workers=8) as executor:
-            tasks = [executor.submit(download_resources_threading, file_name, source_file_path, domain, scheme, tmpdirname, bar) for file_name, source_file_path in to_download.items()]
-            result = [task.result() for task in tasks]
+            for file_name, source_file_path in to_download.items():
+                executor.submit(download_resources_threading, file_name, source_file_path, domain, scheme, tmpdirname, bar)
         for resource in to_download.keys():
             path = os.path.join(tmpdirname, resource)
             assert os.path.isfile(path)

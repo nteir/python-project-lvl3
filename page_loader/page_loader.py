@@ -82,14 +82,15 @@ def download(source_url, dest_path=None):
         global bar
         bar = Bar('Downloading', max=len(to_download))
         with futures.ThreadPoolExecutor(max_workers=8) as executor:
-            for file_name, source_file_path in to_download.items():
-                executor.submit(
-                    download_resources_threading,
-                    file_name,
-                    source_file_path,
-                    domain, scheme,
-                    resource_path,
-                    bar)
+            tasks = [executor.submit(
+                download_resources_threading,
+                file_name,
+                source_file_path,
+                domain, scheme,
+                resource_path,
+                bar) for file_name, source_file_path in to_download.items()]
+            result = [task.result() for task in tasks]
+            logging.info(f'All assets downloaded: {result}')
         bar.finish()
     return dest_file_path
 
