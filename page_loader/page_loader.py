@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import logging
 from progress.bar import Bar
 import argparse
+from concurrent import futures
 
 TAGS = {
     'img': 'src',
@@ -78,7 +79,19 @@ def download(source_url, dest_path=None):
     if to_download:
         resource_path = os.path.join(dest_path, resource_dir_name)
         create_resource_dir(resource_path)
-        download_resources(to_download, domain, scheme, resource_path)
+        global bar
+        bar = Bar('Downloading', max=len(to_download))
+        with futures.ThreadPoolExecutor(max_workers=8) as executor:
+            tasks = [executor.submit(
+                download_resources_threading,
+                file_name,
+                source_file_path,
+                domain, scheme,
+                resource_path,
+                bar) for file_name, source_file_path in to_download.items()]
+            result = [task.result() for task in tasks]
+            logging.info(f"All assets was downloaded: {result}")
+        bar.finish()
     return dest_file_path
 
 
@@ -148,26 +161,31 @@ def get_new_filename(url):
     return file_name_string
 
 
-def download_resources(files, domain, scheme, dest_path):
-    bar = Bar('Downloading', max=len(files))
-    for file_name, source_file_path in files.items():
-        full_source_file_path = source_file_path
-        split_url = urlparse(source_file_path)
-        if split_url.netloc == '':
-            full_source_file_path = urlunparse(
-                (scheme, domain, source_file_path, '', '', '')
-            )
-        dest_file_path = os.path.join(dest_path, file_name)
-        try:
-            r = requests.get(full_source_file_path, stream=True)
-            write_res_file(r, dest_file_path, full_source_file_path)
-        except OSError as e:
-            log_str = e.message if hasattr(e, 'message') else e
-            logging.debug(log_str)
-            logging.warning('Failed to access a resource file.')
-            raise ResourceDownloadError() from e
-        bar.next()
-    bar.finish()
+def download_resources_threading(
+    file_name,
+    source_file_path,
+    domain, scheme,
+    dest_path,
+    bar
+):
+
+    full_source_file_path = source_file_path
+    split_url = urlparse(source_file_path)
+    if split_url.netloc == '':
+        full_source_file_path = urlunparse(
+            (scheme, domain, source_file_path, '', '', '')
+        )
+    dest_file_path = os.path.join(dest_path, file_name)
+    try:
+        r = requests.get(full_source_file_path, stream=True)
+        write_res_file(r, dest_file_path, full_source_file_path)
+    except OSError as e:
+        log_str = e.message if hasattr(e, 'message') else e
+        logging.debug(log_str)
+        logging.warning('Failed to access a resource file.')
+        raise ResourceDownloadError() from e
+    bar.next()
+    return dest_file_path
 
 
 def write_res_file(req, dest_file_path, source_file_path):

@@ -8,10 +8,6 @@ def main():
     args = pl.parse_arguments()
     try:
         print(pl.download(args.source, dest_path=args.output))
-    # except BaseOSError as e:
-    #     log_str = e.message if hasattr(e, 'message') else e
-    #     logging.debug(log_str)
-    #     sys.exit(1)
     except pl.ResourceDownloadError as e:
         log_str = e.message if hasattr(e, 'message') else e
         logging.debug(log_str)

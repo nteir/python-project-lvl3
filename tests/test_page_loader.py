@@ -1,8 +1,10 @@
-from page_loader.page_loader import FileSystemError, PageDownloadError, parse_arguments, download, download_resources, get_html_content
+from page_loader.page_loader import FileSystemError, PageDownloadError, parse_arguments, download, download_resources_threading, get_html_content
 from bs4 import BeautifulSoup
 import os.path
 import os
 import sys
+from concurrent import futures
+from progress.bar import Bar
 import tempfile
 import requests_mock as req_mock
 import pytest
@@ -85,7 +87,10 @@ def test_download_resources(requests_mock):
         text="Some fake response",
     )
     with tempfile.TemporaryDirectory() as tmpdirname:
-        download_resources(to_download, domain, scheme, tmpdirname)
+        bar = Bar('Downloading', max=len(to_download))
+        with futures.ThreadPoolExecutor(max_workers=8) as executor:
+            tasks = [executor.submit(download_resources_threading, file_name, source_file_path, domain, scheme, tmpdirname, bar) for file_name, source_file_path in to_download.items()]
+            result = [task.result() for task in tasks]
         for resource in to_download.keys():
             path = os.path.join(tmpdirname, resource)
             assert os.path.isfile(path)
